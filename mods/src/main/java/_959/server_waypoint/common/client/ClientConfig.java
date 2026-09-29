@@ -1,6 +1,7 @@
 package _959.server_waypoint.common.client;
 
 import _959.server_waypoint.common.client.render.OptimizedWaypointRenderer;
+import _959.server_waypoint.common.util.XaerosApiCheck;
 import com.google.gson.annotations.Expose;
 
 public class ClientConfig {
@@ -10,6 +11,7 @@ public class ClientConfig {
     @Expose private int waypointBackgroundAlpha = 0x80; // [0, 255]
     @Expose private int viewDistance = 12;
     @Expose private boolean autoSyncToXaerosMinimap = true;
+    @Expose private boolean xaerosServerWaypoints = true;
     public static boolean isXaerosMinimapLoaded = false;
 
     private ClientConfig() {}
@@ -29,6 +31,14 @@ public class ClientConfig {
 
     public void setAutoSyncToXaerosMinimap(boolean autoSyncToXaerosMinimap) {
         this.autoSyncToXaerosMinimap = autoSyncToXaerosMinimap;
+    }
+
+    public boolean isXaerosServerWaypoints() {
+        return xaerosServerWaypoints && XaerosApiCheck.hasThirdPartyWaypoints();
+    }
+
+    public void setXaerosServerWaypoints(boolean xaerosServerWaypoints) {
+        this.xaerosServerWaypoints = xaerosServerWaypoints;
     }
 
     public int getViewDistance() {

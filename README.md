@@ -1,3 +1,15 @@
+# Server Waypoint Reworked (unofficial fork)
+
+Unofficial fork of **Server Waypoint** for Forge 1.20.1, maintained by lilDorito. It fixes waypoint sync breaking after players respawn, shows server waypoints in Xaero's Minimap and World Map for every player,
+and stores waypoints per world on dedicated servers. See [CHANGELOG.md](/CHANGELOG.md) for details.
+Not endorsed by the original author. Original mod by **2676959**:
+[GitHub](https://github.com/2676959/server_waypoint) ·
+[Modrinth](https://modrinth.com/plugin/server_waypoint) ·
+[CurseForge](https://www.curseforge.com/minecraft/mc-mods/server-waypoint).
+Licensed under the MIT License (see [LICENSE](/LICENSE)).
+
+---
+
 # Server Waypoint
 
 [English](README.md) [中文](README_zh.md)

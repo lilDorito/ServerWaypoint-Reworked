@@ -30,6 +30,16 @@ public abstract class ServerPlayerEntityMixin
         this.sw$locale = packet.language();
     }
 
+    @Inject(
+            method = "restoreFrom",
+            at = @At(value = "TAIL")
+    )
+    private void sw$keepLocaleOnRespawn(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
+        if (this.sw$locale == null) {
+            this.sw$locale = ((PlayerLocaleAccessor) oldPlayer).sw$getLocale();
+        }
+    }
+
     @Nullable
     @Override
     public String sw$getLocale() {

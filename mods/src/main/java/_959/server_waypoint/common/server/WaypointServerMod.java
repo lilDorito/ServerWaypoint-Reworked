@@ -115,6 +115,13 @@ public class WaypointServerMod extends WaypointServerCore {
                     return;
                 }
                 initConfigAndLanguageResource();
+                if (CONFIG.Features().waypointsInWorldFolder()) {
+                    Path worldWaypointsDir = asIntegratedServer(minecraftServer.getWorldPath(LevelResource.ROOT).normalize());
+                    migrateSharedWaypoints(this.waypointFilesDir, worldWaypointsDir);
+                    this.waypointFilesDir = worldWaypointsDir;
+                    useWorldServerId(worldWaypointsDir.getParent());
+                    LOGGER.info("Waypoints are stored in the world folder: {}", worldWaypointsDir);
+                }
                 initOrReadWaypointFiles();
             } else {
                 WaypointList.excludeClientOnlyFields = false;
@@ -134,6 +141,7 @@ public class WaypointServerMod extends WaypointServerCore {
 
     public void unload() {
         freeAllLoadedFiles();
+        clearWorldServerId();
         setMinecraftServer(null);
         this.loaded = false;
         runsWithClient = false;

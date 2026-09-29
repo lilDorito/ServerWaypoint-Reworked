@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -27,6 +28,8 @@ import static _959.server_waypoint.util.WaypointFilesDirectoryHelper.asDedicated
 public abstract class WaypointServerCore extends WaypointFilesManagerCore {
     public static WaypointServerCore INSTANCE;
     private static int worldId;
+    private static final String WORLD_SERVER_ID_FILE = "server_id.txt";
+    private static volatile Integer worldServerId;
     public static Config CONFIG = new Config();
     public static final Logger LOGGER = LoggerFactory.getLogger("server_waypoint_core");
     private static final String CONFIG_FILE_NAME = "config.json";
@@ -197,6 +200,70 @@ public abstract class WaypointServerCore extends WaypointFilesManagerCore {
                 CONFIG.Features().sendXaerosWorldId(false);
                 LOGGER.error("Cannot enable sendXaerosWorldId: failed to create xaeromap.txt: ", ee);
             }
+        }
+    }
+
+    /**
+     * the id sent to clients in the handshake; clients keep a separate waypoint cache per id
+     */
+    public static int getEffectiveServerId() {
+        Integer id = worldServerId;
+        return id != null ? id : CONFIG.getServerId();
+    }
+
+    public static void clearWorldServerId() {
+        worldServerId = null;
+    }
+
+    /**
+     * reads (or creates) a server id stored in the world folder, so each world gets its own client cache
+     */
+    protected void useWorldServerId(Path worldDataDir) {
+        Path idFile = worldDataDir.resolve(WORLD_SERVER_ID_FILE);
+        try {
+            if (Files.isRegularFile(idFile)) {
+                worldServerId = Integer.parseInt(Files.readString(idFile).trim());
+                return;
+            }
+        } catch (IOException | NumberFormatException e) {
+            LOGGER.error("Invalid {}, creating a new one", idFile, e);
+        }
+        int id = new Random().nextInt();
+        try {
+            Files.createDirectories(worldDataDir);
+            Files.writeString(idFile, Integer.toString(id));
+        } catch (IOException e) {
+            LOGGER.error("Failed to save {}", idFile, e);
+        }
+        worldServerId = id;
+    }
+
+    /**
+     * copies the waypoints from the old shared folder into the first world that runs with
+     * waypointsInWorldFolder, then renames the old folder so it is not copied into other worlds
+     */
+    protected void migrateSharedWaypoints(Path sharedDir, Path worldDir) {
+        if (!Files.isDirectory(sharedDir) || Files.exists(worldDir)) {
+            return;
+        }
+        try {
+            Files.createDirectories(worldDir);
+            int copied = 0;
+            try (DirectoryStream<Path> entries = Files.newDirectoryStream(sharedDir)) {
+                for (Path file : entries) {
+                    if (Files.isRegularFile(file)) {
+                        Files.copy(file, worldDir.resolve(file.getFileName().toString()));
+                        copied++;
+                    }
+                }
+            }
+            Path migratedDir = sharedDir.resolveSibling(sharedDir.getFileName() + "_moved_to_world");
+            if (!Files.exists(migratedDir)) {
+                Files.move(sharedDir, migratedDir);
+            }
+            LOGGER.info("Copied {} waypoint file(s) from {} into {}", copied, sharedDir, worldDir);
+        } catch (IOException e) {
+            LOGGER.error("Failed to copy waypoints from {} into {}", sharedDir, worldDir, e);
         }
     }
 

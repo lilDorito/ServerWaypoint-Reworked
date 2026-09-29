@@ -1,6 +1,7 @@
 package _959.server_waypoint.common.client.handlers;
 
 import _959.server_waypoint.common.client.WaypointClientMod;
+import _959.server_waypoint.common.util.XaerosServerWaypointsHelper;
 import _959.server_waypoint.core.network.buffer.*;
 import _959.server_waypoint.core.waypoint.SimpleWaypoint;
 import _959.server_waypoint.core.waypoint.WaypointList;
@@ -28,9 +29,17 @@ import static _959.server_waypoint.text.WaypointTextHelper.waypointTextWithTp;
  * only runs XaerosMinimap related logic when receiving buffers
  * */
 public class HandlerForXaerosMinimap implements BufferHandler {
+    private static boolean useServerWaypoints() {
+        return WaypointClientMod.getClientConfig().isXaerosServerWaypoints();
+    }
+
     public static void syncFromServerWaypointMod() {
         WaypointClientMod waypointClientMod = WaypointClientMod.getInstance();
         MinimapSession session = getMinimapSession();
+        if (useServerWaypoints()) {
+            XaerosServerWaypointsHelper.syncAll(session);
+            return;
+        }
         waypointClientMod.forEachWaypointFileManager((fileManager) ->
             addOrReplaceWaypointLists(session, getDimensionKey(fileManager.getDimensionName()), fileManager.getWaypointLists()));
         saveAllWorlds(session);
@@ -57,6 +66,11 @@ public class HandlerForXaerosMinimap implements BufferHandler {
         }
         WaypointList waypointList = buffer.waypointList();
         MinimapSession session = getMinimapSession();
+        if (useServerWaypoints()) {
+            XaerosServerWaypointsHelper.syncDimension(session, dimensionName);
+            displayClientMessage(player, Component.translatable("server_waypoint.list.added.xaeros", waypointList.name()));
+            return;
+        }
         MinimapWorld minimapWorld = getMinimapWorld(session, dimKey);
         replaceWaypointList(minimapWorld, waypointList);
         displayClientMessage(player, Component.translatable("server_waypoint.list.added.xaeros", waypointList.name()));
@@ -73,6 +87,11 @@ public class HandlerForXaerosMinimap implements BufferHandler {
             return;
         }
         MinimapSession session = getMinimapSession();
+        if (useServerWaypoints()) {
+            XaerosServerWaypointsHelper.syncDimension(session, dimensionName);
+            displayClientMessage(player, Component.translatable("server_waypoint.dimension.waypoint.added.xaeros", Component.literal(dimensionName).withStyle(getDimensionColor(dimensionName))));
+            return;
+        }
         MinimapWorld minimapWorld = getMinimapWorld(session, dimKey);
         replaceWaypointLists(minimapWorld, buffer.waypointLists());
         displayClientMessage(player, Component.translatable("server_waypoint.dimension.waypoint.added.xaeros", Component.literal(dimensionName).withStyle(getDimensionColor(dimensionName))));
@@ -83,6 +102,11 @@ public class HandlerForXaerosMinimap implements BufferHandler {
     public void onWorldWaypoint(WorldWaypointBuffer buffer) {
         Player player = Minecraft.getInstance().player;
         MinimapSession session = getMinimapSession();
+        if (useServerWaypoints()) {
+            XaerosServerWaypointsHelper.syncAll(session);
+            displayClientMessage(player, Component.translatable("server_waypoint.all.added.xaeros"));
+            return;
+        }
         for (DimensionWaypointBuffer dimensionWaypointBuffer : buffer) {
             addDimensionWaypoint(session, dimensionWaypointBuffer);
         }
@@ -114,6 +138,17 @@ public class HandlerForXaerosMinimap implements BufferHandler {
         }
 
         MinimapSession session = getMinimapSession();
+        if (useServerWaypoints()) {
+            XaerosServerWaypointsHelper.syncDimension(session, dimensionName);
+            String listName = buffer.listName();
+            switch (buffer.type()) {
+                case ADD -> displayClientMessage(player, Component.translatable("server_waypoint.modification.add.xaeros", toVanillaText(waypointTextWithTp(buffer.waypoint(), dimensionName, listName))));
+                case UPDATE -> displayClientMessage(player, Component.translatable("server_waypoint.modification.update.xaeros", toVanillaText(waypointTextWithTp(buffer.waypoint(), dimensionName, listName))));
+                default -> {
+                }
+            }
+            return;
+        }
         MinimapWorld minimapWorld = getMinimapWorld(session, dimKey);
         WaypointSet waypointSet = minimapWorld.getWaypointSet(buffer.listName());
 

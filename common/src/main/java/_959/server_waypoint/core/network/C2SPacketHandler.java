@@ -12,7 +12,6 @@ import net.kyori.adventure.text.format.TextDecoration;
 
 import java.util.*;
 
-import static _959.server_waypoint.core.WaypointServerCore.CONFIG;
 import static _959.server_waypoint.core.WaypointServerCore.LOGGER;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -31,11 +30,11 @@ public class C2SPacketHandler<S, P> {
         LOGGER.info("client join with protocol version: {}", clientVersion);
 
         if (clientVersion == ProtocolVersion.PROTOCOL_VERSION) {
-            this.sender.sendPlayerPacket(player, new ServerHandshakeBuffer(CONFIG.getServerId()));
+            this.sender.sendPlayerPacket(player, new ServerHandshakeBuffer(WaypointServerCore.getEffectiveServerId()));
         } else {
             this.sender.sendPlayerMessage(player, translatable("waypoint.incompatible.client",
                     text(ProtocolVersion.COMPATIBLE_VERSION).color(NamedTextColor.GREEN).decorate(TextDecoration.UNDERLINED).clickEvent(ClickEvent.openUrl(ModInfo.DOWNLOAD_URL))));
-            this.sender.sendPlayerPacket(player, new ServerHandshakeBuffer(CONFIG.getServerId()));
+            this.sender.sendPlayerPacket(player, new ServerHandshakeBuffer(WaypointServerCore.getEffectiveServerId()));
             LOGGER.warn("client version mismatch: {}", clientVersion);
         }
     }

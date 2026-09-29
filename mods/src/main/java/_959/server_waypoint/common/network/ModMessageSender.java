@@ -2,6 +2,7 @@ package _959.server_waypoint.common.network;
 
 //? if <= 1.20.1
 /*import _959.server_waypoint.access.PlayerLocaleAccessor;*/
+import _959.server_waypoint.common.server.WaypointServerMod;
 import _959.server_waypoint.core.network.PlatformMessageSender;
 import _959.server_waypoint.core.network.buffer.MessageBuffer;
 import _959.server_waypoint.core.network.buffer.WaypointModificationBuffer;
@@ -68,7 +69,7 @@ public class ModMessageSender implements PlatformMessageSender<CommandSourceStac
         *///?} else {
         String language = player.clientInformation().language();
         //?}
-        Locale locale = Translator.parseLocale(language);
+        Locale locale = language == null || language.isEmpty() ? null : Translator.parseLocale(language);
         if (locale == null) {
             locale = Locale.getDefault();
         }
@@ -98,12 +99,18 @@ public class ModMessageSender implements PlatformMessageSender<CommandSourceStac
 //        } else {
 //            info = Component.translatable("waypoint.modification.broadcast.server", modification.type().toTranslatable(), waypointText);
 //        }
-        source.getServer().getPlayerList().getPlayers().forEach(
-                player -> {
-                    sendPlayerMessage(player, info);
-                    sendPlayerPacket(player, modification);
-                }
-        );
+        for (ServerPlayer player : source.getServer().getPlayerList().getPlayers()) {
+            try {
+                sendPlayerPacket(player, modification);
+            } catch (RuntimeException e) {
+                WaypointServerMod.LOGGER.error("Failed to send waypoint update to {}", player.getGameProfile().getName(), e);
+            }
+            try {
+                sendPlayerMessage(player, info);
+            } catch (RuntimeException e) {
+                WaypointServerMod.LOGGER.error("Failed to send waypoint message to {}", player.getGameProfile().getName(), e);
+            }
+        }
     }
 
     @Override

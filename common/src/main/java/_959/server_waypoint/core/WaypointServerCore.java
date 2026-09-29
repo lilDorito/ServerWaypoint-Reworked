@@ -22,9 +22,6 @@ import java.util.*;
 import static _959.server_waypoint.translation.LanguageFilesManager.getExternalLoadedLanguages;
 import static _959.server_waypoint.util.WaypointFilesDirectoryHelper.asDedicatedServer;
 
-/**
- * Serverside waypoint manager used by a dedicated or integrated server
- * */
 public abstract class WaypointServerCore extends WaypointFilesManagerCore {
     public static WaypointServerCore INSTANCE;
     private static int worldId;
@@ -37,11 +34,6 @@ public abstract class WaypointServerCore extends WaypointFilesManagerCore {
     private final byte[] DEFAULT_CONFIG;
     private final LanguageFilesManager languageFilesManager;
 
-    /**
-     * constructor for a dedicated server </br>
-     * integrated server can also this but must call {@link _959.server_waypoint.core.WaypointFilesManagerCore#changeWaypointFilesDir(Path) changeWaypointFilesDir}
-     * before loading waypoint files
-     */
     public WaypointServerCore(Path configDir) {
         super(asDedicatedServer(configDir));
         this.configDir = configDir;
@@ -132,9 +124,6 @@ public abstract class WaypointServerCore extends WaypointFilesManagerCore {
         GlobalTranslator.translator().addSource(translator);
     }
 
-    /**
-     * only initialize config file and language files, should only call once
-     * */
     public void initConfigAndLanguageResource() throws IOException {
         this.initConfigDir(this.configDir);
         this.initOrReadConfigFile(this.configDir);
@@ -144,9 +133,7 @@ public abstract class WaypointServerCore extends WaypointFilesManagerCore {
         LOGGER.info("Loaded {} languages: {}", languages.size(), log);
     }
 
-    /**
-     * calls saveAllFiles first then free all loaded waypoint files and external language files <br>
-     * */
+
     public void freeAllLoadedFiles() {
         saveAllFiles();
         this.fileManagerMap.clear();
@@ -169,9 +156,6 @@ public abstract class WaypointServerCore extends WaypointFilesManagerCore {
         }
     }
 
-    /**
-     * save all config file and waypoint files
-     */
     public void saveAllFiles() {
         saveAllWaypointFiles();
         saveConfigFile(this.configDir);
@@ -203,9 +187,6 @@ public abstract class WaypointServerCore extends WaypointFilesManagerCore {
         }
     }
 
-    /**
-     * the id sent to clients in the handshake; clients keep a separate waypoint cache per id
-     */
     public static int getEffectiveServerId() {
         Integer id = worldServerId;
         return id != null ? id : CONFIG.getServerId();
@@ -215,9 +196,6 @@ public abstract class WaypointServerCore extends WaypointFilesManagerCore {
         worldServerId = null;
     }
 
-    /**
-     * reads (or creates) a server id stored in the world folder, so each world gets its own client cache
-     */
     protected void useWorldServerId(Path worldDataDir) {
         Path idFile = worldDataDir.resolve(WORLD_SERVER_ID_FILE);
         try {
@@ -238,10 +216,6 @@ public abstract class WaypointServerCore extends WaypointFilesManagerCore {
         worldServerId = id;
     }
 
-    /**
-     * copies the waypoints from the old shared folder into the first world that runs with
-     * waypointsInWorldFolder, then renames the old folder so it is not copied into other worlds
-     */
     protected void migrateSharedWaypoints(Path sharedDir, Path worldDir) {
         if (!Files.isDirectory(sharedDir) || Files.exists(worldDir)) {
             return;

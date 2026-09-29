@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import static _959.server_waypoint.util.WaypointFilesDirectoryHelper.asIntegratedServer;
 
 public class WaypointServerMod extends WaypointServerCore {
-    // the default value is true because this is used by WaypointClient to identify the server
     private static boolean runsWithClient = false;
     private static WaypointServerMod INSTANCE;
     public static MinecraftServer MINECRAFT_SERVER;

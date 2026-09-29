@@ -17,10 +17,6 @@ public class Features {
         return noXaerosMod && this.sendXaerosWorldId;
     }
 
-    /**
-     * dedicated server only: store waypoints in &lt;world&gt;/server_waypoint/waypoints instead of the config folder,
-     * so every world (map) has its own waypoints
-     */
     public boolean waypointsInWorldFolder() {
         return this.waypointsInWorldFolder;
     }

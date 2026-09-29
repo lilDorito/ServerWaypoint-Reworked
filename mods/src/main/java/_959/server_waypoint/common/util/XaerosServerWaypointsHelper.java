@@ -26,11 +26,6 @@ import static _959.server_waypoint.common.util.XaeroMinimapHelper.getMinimapWorl
 import static _959.server_waypoint.common.util.XaeroMinimapHelper.saveMinimapWorld;
 import static _959.server_waypoint.common.util.XaerosWaypointHelper.simpleWaypointToXaerosWaypoint;
 
-/**
- * Shows the server's waypoints in Xaero's Minimap and World Map as server-provided (third-party) waypoints.
- * They appear in the default waypoint set for every player, are rebuilt from the server data on every sync
- * and are never written into the player's own waypoint sets.
- */
 public final class XaerosServerWaypointsHelper {
     private static final String ORIGIN_PATH = "waypoints";
     private static java.lang.reflect.Field worldMapMinimapSupport;
@@ -75,10 +70,6 @@ public final class XaerosServerWaypointsHelper {
         refreshWorldMap();
     }
 
-    /**
-     * Xaero's World Map only re-reads minimap waypoints when its screen opens. Ask it to refresh now so a waypoint
-     * added while the map is open shows up right away. The World Map is optional, so it is reached by reflection.
-     */
     private static void refreshWorldMap() {
         if (worldMapUnavailable) {
             return;
@@ -130,10 +121,6 @@ public final class XaerosServerWaypointsHelper {
         return listName + "/" + waypointName;
     }
 
-    /**
-     * Older versions copied every server list into a Xaero waypoint set with the same name. Such a set is removed
-     * only when all of its waypoints still come from the server list, so waypoints a player added by hand are kept.
-     */
     private static void removeLegacySets(MinimapSession session, ResourceKey<Level> dimKey, List<WaypointList> waypointLists) {
         MinimapWorld minimapWorld;
         try {

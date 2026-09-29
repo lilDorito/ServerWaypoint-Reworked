@@ -42,26 +42,20 @@ public class C2SPacketHandler<S, P> {
     public void onClientUpdateRequest(P player, ClientUpdateRequestBuffer buffer) {
         UpdatesBundleBuffer updatesBundle = new UpdatesBundleBuffer();
         List<String> allDimensionsOnServer = new ArrayList<>(this.waypointServer.getFileManagerMap().keySet());
-        // iterating all dimensions from client and compare with server
         for (DimensionSyncIdentifier dimensionSyncId : buffer.dimensionSyncIds()) {
             String dimensionOnClient = dimensionSyncId.dimensionName();
             WaypointFileManager fileManager = this.waypointServer.getWaypointFileManager(dimensionOnClient);
             if (fileManager == null) {
-                // tell client to remove
                 updatesBundle.add(new DimensionWaypointBuffer(dimensionOnClient, new ArrayList<>()));
             } else {
-                // prepare updates in that dimension for client
                 List<String> allListsOnServer = new ArrayList<>(fileManager.getWaypointListMap().keySet());
                 List<WaypointList> listUpdates = new ArrayList<>();
-                // iterating all lists from client and compare
                 for (WaypointListSyncIdentifier listSyncId : dimensionSyncId.listSyncIds()) {
                     String listOnClient = listSyncId.listName();
                     WaypointList waypointList = fileManager.getWaypointListByName(listOnClient);
                     if (waypointList == null) {
-                        // tell client to remove
                         listUpdates.add(WaypointList.build(listOnClient, WaypointList.REMOVE_LIST));
                     } else {
-                        // updates of list for client
                         int serverSyncNum = waypointList.getSyncNum();
                         if (serverSyncNum != listSyncId.syncNum()) {
                             listUpdates.add(waypointList);
@@ -69,7 +63,6 @@ public class C2SPacketHandler<S, P> {
                         allListsOnServer.remove(listOnClient);
                     }
                 }
-                // add the rest of lists that client does not have
                 for (String listName : allListsOnServer) {
                     listUpdates.add(fileManager.getWaypointListByName(listName));
                 }
@@ -79,10 +72,8 @@ public class C2SPacketHandler<S, P> {
                 allDimensionsOnServer.remove(dimensionOnClient);
             }
         }
-        // add the rest of dimensions on server that client does not have
         for (String dimensionName : allDimensionsOnServer) {
             WaypointFileManager waypointFileManager = this.waypointServer.getWaypointFileManager(dimensionName);
-            // should always be nonnull, but check just in case; the empty ones on server should not be sent to client
             if (waypointFileManager != null && !waypointFileManager.isEmpty()) {
                 updatesBundle.add(waypointFileManager.toDimensionWaypoint());
             }

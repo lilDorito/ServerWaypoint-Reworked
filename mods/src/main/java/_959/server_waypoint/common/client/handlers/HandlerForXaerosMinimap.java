@@ -25,9 +25,6 @@ import static _959.server_waypoint.common.util.XaeroMinimapHelper.*;
 import static _959.server_waypoint.common.util.XaerosWaypointHelper.simpleWaypointToXaerosWaypoint;
 import static _959.server_waypoint.text.WaypointTextHelper.waypointTextWithTp;
 
-/**
- * only runs XaerosMinimap related logic when receiving buffers
- * */
 public class HandlerForXaerosMinimap implements BufferHandler {
     private static boolean useServerWaypoints() {
         return WaypointClientMod.getClientConfig().isXaerosServerWaypoints();

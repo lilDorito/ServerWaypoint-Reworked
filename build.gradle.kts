@@ -16,7 +16,7 @@ plugins {
     id("com.modrinth.minotaur") version "2.9.0" apply false
 }
 
-val modrinthProjectPaths = listOf(project(":mods"), project(":paper"))
+val modrinthProjectPaths = listOf(project(":mods"))
     .flatMap { it.subprojects }
     .map { it.path }
     .sorted()
